@@ -19,27 +19,30 @@ const Navbar = () => {
     ];
 
     const handleNavClick = (e, link) => {
+        // Solo interceptamos el scroll si ya estamos en la página de inicio
         if (location.pathname === '/') {
             e.preventDefault();
 
-            // 1. FORZAMOS EL RE-CÁLCULO DE ALTURA
+            // 1. Forzamos a Lenis a recalcular las alturas (importante si las imágenes cargaron tarde)
             lenis?.resize();
 
             if (link.path === '/') {
+                // Ir arriba del todo
                 lenis?.scrollTo(0, { duration: 1.5 });
             } else {
-                const targetId = link.path.replace('/', '');
-                const element = document.getElementById(targetId);
+                // 2. CORRECCIÓN: Usamos 'link.id' directamente (ej: "nosotros") en lugar de procesar el path
+                const element = document.getElementById(link.id);
 
                 if (element) {
-                    lenis?.scrollTo(element, { // Pasamos el elemento directo, es más seguro
-                        offset: -80, // Ajuste para el header
+                    lenis?.scrollTo(element, {
+                        offset: -80, // Espacio para que la barra no tape el título
                         duration: 1.5,
                         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
                     });
                 }
             }
         }
+        // Si no estamos en el inicio (ej: /booking), dejamos que React Router haga su trabajo normal
     };
 
     return (
@@ -48,7 +51,7 @@ const Navbar = () => {
             {/* Logo */}
             <Link
                 to="/"
-                onClick={(e) => handleNavClick(e, { path: '/' })}
+                onClick={(e) => handleNavClick(e, { path: '/', id: 'top' })}
                 className="flex items-center gap-2 group cursor-pointer"
             >
                 <div className="bg-[#2C342C] text-[#F2F0E9] p-1.5 rounded-full group-hover:bg-[#C5A880] transition-colors">
