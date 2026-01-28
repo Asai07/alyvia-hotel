@@ -86,15 +86,14 @@ const BookingWidget = () => {
     };
 
 
-    // Clases dinámicas de posición
     const popupClasses = `
     z-50 bg-white p-4 md:p-6 rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden
     
-    /* MÓVIL (Fixed y Centrado) */
-    fixed inset-x-4 top-1/2 -translate-y-1/2 w-auto max-h-[80vh] overflow-y-auto
+    /* MÓVIL: SIEMPRE CENTRADO (Ignora cálculos de JS) */
+    fixed left-4 right-4 top-1/2 -translate-y-1/2 w-auto max-h-[85dvh] overflow-y-auto shadow-[0_0_0_100vmax_rgba(0,0,0,0.6)]
     
-    /* ESCRITORIO (Absolute y Dropdown) */
-    md:absolute md:inset-auto md:w-auto md:overflow-visible md:translate-y-0
+    /* ESCRITORIO: Comportamiento Flotante (Calculado) */
+    md:fixed-none md:shadow-2xl md:inset-auto md:w-auto md:overflow-visible md:translate-y-0
     ${menuPlacement === 'top' ? 'md:bottom-full md:mb-4' : 'md:top-full md:mt-4'} md:left-0
 `;
     const animProps = {
@@ -136,7 +135,7 @@ const BookingWidget = () => {
                         <AnimatePresence>
                             {openMenu === 'dates' && (
                                 <>
-                                    {/* BACKDROP PARA MÓVIL (Detecta clic fuera y oscurece fondo) */}
+                                    {/* BACKDROP (Para cerrar al hacer clic fuera) */}
                                     <motion.div
                                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
@@ -146,16 +145,20 @@ const BookingWidget = () => {
                                     {/* EL POPUP */}
                                     <motion.div
                                         ref={calendarPopupRef}
-                                        initial={{ opacity: 0, scale: 0.95, y: 10 }} // Animación ajustada
+                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                        className={popupClasses} // <--- Usamos las clases nuevas
+                                        className={popupClasses}
                                         onMouseDown={(e) => e.stopPropagation()}
                                     >
-                                        {/* Botón Cerrar para móvil (UX Vital) */}
+                                        {/* Header Móvil */}
                                         <div className="flex md:hidden justify-between items-center mb-4 pb-2 border-b border-gray-100">
                                             <span className="font-serif text-lg text-[#2C342C]">Seleccionar Fechas</span>
-                                            <button onClick={() => setOpenMenu(null)} className="text-xs font-bold text-[#C5A880] uppercase">Cerrar</button>
+                                            {/* Botón X discreto arriba */}
+                                            <button onClick={() => setOpenMenu(null)} className="p-2 text-gray-400 hover:text-[#2C342C]">
+                                                {/* Asegúrate de tener X importado de lucide-react, si no usa texto "X" */}
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 18 18" /></svg>
+                                            </button>
                                         </div>
 
                                         <DayPicker
@@ -163,14 +166,24 @@ const BookingWidget = () => {
                                             selected={dateRange}
                                             onSelect={setDateRange}
                                             locale={es}
-                                            // IMPORTANTE: Ajustar tamaño de fuente para móviles pequeños
                                             styles={{
                                                 root: { '--rdp-accent-color': '#2C342C', '--rdp-background-color': '#F2F0E9', margin: 0 },
-                                                day: { fontSize: '0.8rem' }, // Letra más chica
+                                                day: { fontSize: '0.9rem' },
                                                 caption_label: { fontSize: '1rem', color: '#2C342C', fontFamily: 'serif' },
-                                                table: { maxWidth: '100%' } // Asegurar que no se desborde
+                                                table: { maxWidth: '100%' }
                                             }}
                                         />
+
+                                        {/* --- NUEVO: BOTÓN GUARDAR (Solo Móvil) --- */}
+                                        <div className="mt-4 pt-4 border-t border-gray-100 md:hidden">
+                                            <button
+                                                onClick={() => setOpenMenu(null)} // Simplemente cierra, los datos ya se guardaron en el state
+                                                className="w-full bg-[#2C342C] text-[#F2F0E9] py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
+                                            >
+                                                Guardar Fechas
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                            </button>
+                                        </div>
                                     </motion.div>
                                 </>
                             )}
