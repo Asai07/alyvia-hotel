@@ -9,11 +9,18 @@ const PromoModal = () => {
     const { openBooking } = useBooking();
 
     useEffect(() => {
-        // Mostrar el modal después de 3 segundos
-        const timer = setTimeout(() => {
-            setIsOpen(true);
-        }, 3000);
-        return () => clearTimeout(timer);
+        // 1. VERIFICAR SI YA SE MOSTRÓ
+        const hasSeenPromo = sessionStorage.getItem('hasSeenPromo');
+
+        if (!hasSeenPromo) {
+            const timer = setTimeout(() => {
+                setIsOpen(true);
+                // 2. MARCAR COMO VISTO EN EL NAVEGADOR
+                sessionStorage.setItem('hasSeenPromo', 'true');
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        }
     }, []);
 
     const handleClose = () => setIsOpen(false);
@@ -52,7 +59,6 @@ const PromoModal = () => {
                         className="
                             relative w-full max-w-4xl bg-[#2C342C] rounded-[2rem] shadow-2xl overflow-hidden 
                             flex flex-col md:flex-row 
-                            /* MÓVIL: Usamos max-h con dvh para respetar barras del navegador */
                             max-h-[85dvh] md:h-auto 
                             mx-4
                         "
@@ -65,7 +71,7 @@ const PromoModal = () => {
                             <X size={18} />
                         </button>
 
-                        {/* COLUMNA IMAGEN (Fija en móvil) */}
+                        {/* COLUMNA IMAGEN */}
                         <div className="w-full md:w-5/12 relative min-h-[180px] md:min-h-full shrink-0">
                             <img
                                 src="https://images.unsplash.com/photo-1549294413-26f195200c16?q=80&w=1964&auto=format&fit=crop"
@@ -75,7 +81,7 @@ const PromoModal = () => {
                             <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#2C342C] via-transparent to-transparent opacity-90"></div>
                         </div>
 
-                        {/* COLUMNA CONTENIDO (Scrollable) */}
+                        {/* COLUMNA CONTENIDO */}
                         <div className="w-full md:w-7/12 flex flex-col overflow-y-auto">
                             <div className="p-6 md:p-12 text-cream flex flex-col justify-center text-center md:text-left h-full">
 

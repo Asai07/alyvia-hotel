@@ -14,9 +14,19 @@ import RestaurantBookingPage from './pages/RestaurantBookingPage';
 import ExperienceBookingPage from './pages/ExperienceBookingPage';
 
 function App() {
+  // CONFIGURACIÓN PREMIUM DE LENIS
+  const lenisOptions = {
+    duration: 1.5,      // Cuánto tarda en frenar (más alto = más suave/pesado)
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Curva de suavizado
+    smoothWheel: true,  // Scroll suave con rueda de ratón
+    smoothTouch: true,  // <--- ESTA ES LA CLAVE: Activa el efecto en móvil
+    touchMultiplier: 1.5, // Sensibilidad del dedo (ajustar si se siente muy lento)
+  };
+
   return (
     <BookingProvider>
-      <ReactLenis root>
+      {/* Pasamos las opciones al componente root */}
+      <ReactLenis root options={lenisOptions}>
         <Router>
           <BookingWidgetModal />
           <Routes>
