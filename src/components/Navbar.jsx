@@ -15,7 +15,7 @@ const Navbar = () => {
         { name: 'Habitaciones', path: '/#habitaciones', id: 'habitaciones' },
         { name: 'Servicios', path: '/#servicios', id: 'servicios' },
         { name: 'Actividades', path: '/#actividades', id: 'actividades' },
-        { name: 'Membresía', path: '/#membresia', id: 'membresia' }
+
     ];
 
     const handleNavClick = (e, link) => {

@@ -71,8 +71,7 @@ const Events = () => {
     const navigate = useNavigate();
 
     return (
-        <section className="bg-[#2C342C] py-12 md:py-24 px-4 md:px-12 w-full md:min-h-screen flex flex-col justify-center relative overflow-hidden">
-
+        <section id="events" className="bg-[#2C342C] py-12 md:py-24 px-4 md:px-12 w-full min-h-[800px] md:min-h-screen flex flex-col justify-center relative overflow-hidden">
             <div className="absolute inset-0 opacity-[0.15] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] mix-blend-overlay"></div>
 
             <div className="max-w-[1600px] mx-auto w-full relative z-10">
