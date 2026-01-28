@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ReactLenis } from 'lenis/react';
+import ScrollToTop from './components/ScrollToTop';
 import LandingPage from './pages/LandingPage';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
@@ -30,6 +31,7 @@ function App() {
       {/* Pasamos las opciones al componente root */}
       <ReactLenis root options={lenisOptions}>
         <Router>
+          <ScrollToTop />
           <BookingWidgetModal />
           <Routes>
             <Route path="/" element={<LandingPage />} />

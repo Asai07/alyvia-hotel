@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-// IMÁGENES LOCALES ACTUALIZADAS CON TEXTOS EN ESPAÑOL
 const galleryImages = [
     {
         id: 1,
@@ -72,8 +71,8 @@ const Gallery = () => {
     return (
         <section className="bg-[#2C342C] py-24 px-6 md:px-12 relative overflow-hidden">
 
-            {/* Decoración Fondo */}
-            <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
+            {/* Decoración Fondo optimizada */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none will-change-transform">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white blur-[150px]" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#C5A880] blur-[150px]" />
             </div>
@@ -108,24 +107,35 @@ const Gallery = () => {
     );
 };
 
-// Componente individual
+// Componente individual OPTIMIZADO
 const GalleryItem = ({ item, index }) => {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 30 }} // Movimiento reducido para menos carga
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-10%" }}
-            transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
-            className="break-inside-avoid relative group overflow-hidden rounded-lg mb-8"
+            viewport={{
+                once: true,
+                margin: "50px" // Empieza a animar 50px antes de entrar
+            }}
+            transition={{
+                duration: 0.6,
+                ease: "easeOut"
+                // Eliminamos el delay secuencial (index * 0.1) para evitar que el navegador acumule cálculos
+            }}
+            className="break-inside-avoid relative group overflow-hidden rounded-lg mb-8 bg-[#2C342C]" // bg para evitar flash blanco
         >
             <img
                 src={item.src}
                 alt={item.title}
-                className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+                decoding="async" // ESENCIAL para scroll fluido
+                className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105 will-change-transform"
             />
+
+            {/* Efecto Hover Simplificado */}
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-            <div className="absolute inset-0 p-8 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-y-4 group-hover:translate-y-0">
+            <div className="absolute inset-0 p-8 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#C5A880] mb-2">
                     {item.category}
                 </span>
