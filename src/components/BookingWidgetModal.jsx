@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { X, CalendarDays, Users, BedDouble, Minus, Plus, Search, Check, ChevronDown } from 'lucide-react'; // Agregué BedDouble y ChevronDown
+import { X, CalendarDays, Users, BedDouble, Minus, Plus, Search, Check, ChevronDown, Tag } from 'lucide-react';
 import { useBooking } from '../context/BookingContext';
 import { format, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -11,23 +11,20 @@ import 'react-day-picker/dist/style.css';
 const ROOM_OPTIONS = ['Cualquier Suite', 'Ocean Villa', 'Garden Suite', 'The Penthouse'];
 
 const BookingWidgetModal = () => {
-    const { isBookingOpen, closeBooking, initialRoom } = useBooking();
+    // 1. OBTENEMOS EL PROMOCODE DEL CONTEXTO
+    const { isBookingOpen, closeBooking, initialRoom, promoCode } = useBooking();
     const navigate = useNavigate();
 
-    // --- ESTADOS ---
     const [dateRange, setDateRange] = useState({
         from: new Date(),
         to: addDays(new Date(), 3)
     });
     const [guests, setGuests] = useState({ adults: 2, children: 0 });
     const [roomType, setRoomType] = useState("Cualquier Suite");
-
-    // Control de qué tab está abierto ('dates', 'guests', 'room', o null)
     const [activeTab, setActiveTab] = useState(null);
 
     useEffect(() => {
         if (isBookingOpen) {
-            // Si viene una habitación predefinida, la usamos. Si no, "Cualquier Suite".
             setRoomType(initialRoom || "Cualquier Suite");
             setActiveTab(null);
         }
@@ -36,13 +33,21 @@ const BookingWidgetModal = () => {
     const handleSearch = () => {
         if (!dateRange?.from || !dateRange?.to) return;
 
-        const params = new URLSearchParams({
+        // Construimos los parámetros
+        const paramsObj = {
             checkIn: dateRange.from.toISOString(),
             checkOut: dateRange.to.toISOString(),
             adults: guests.adults,
             children: guests.children,
-            roomType: roomType // Aquí mandamos la selección al BookingPage
-        });
+            roomType: roomType
+        };
+
+        // 2. SI HAY CUPÓN, LO AGREGAMOS A LA URL
+        if (promoCode) {
+            paramsObj.promo = promoCode;
+        }
+
+        const params = new URLSearchParams(paramsObj);
 
         closeBooking();
         window.scrollTo(0, 0);
@@ -64,20 +69,18 @@ const BookingWidgetModal = () => {
             {isBookingOpen && (
                 <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center px-4 pb-4 md:pb-0">
 
-                    {/* BACKDROP */}
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         onClick={closeBooking}
                         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                     />
 
-                    {/* MODAL CONTAINER */}
                     <motion.div
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl z-10 overflow-hidden flex flex-col md:flex-row max-h-[85dvh] h-auto mx-4"                    >
-                        {/* BOTÓN CERRAR */}
+                        className="relative bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl z-10 overflow-hidden flex flex-col md:flex-row max-h-[85vh] h-auto"
+                    >
                         <button
                             onClick={closeBooking}
                             className="absolute top-4 right-4 z-20 w-10 h-10 bg-white/80 hover:bg-white backdrop-blur rounded-full flex items-center justify-center text-[#2C342C] transition-colors shadow-sm"
@@ -85,7 +88,7 @@ const BookingWidgetModal = () => {
                             <X size={20} />
                         </button>
 
-                        {/* COLUMNA IZQUIERDA: IMAGEN */}
+                        {/* COLUMNA IZQUIERDA */}
                         <div className="hidden md:flex w-5/12 relative bg-[#2C342C] min-h-[400px]">
                             <img
                                 src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
@@ -95,6 +98,13 @@ const BookingWidgetModal = () => {
                             <div className="absolute inset-0 bg-gradient-to-t from-[#2C342C] via-transparent to-transparent opacity-90"></div>
 
                             <div className="relative z-10 p-10 flex flex-col justify-end h-full text-[#F2F0E9]">
+                                {/* 3. MOSTRAR SI HAY CUPÓN ACTIVO */}
+                                {promoCode && (
+                                    <div className="mb-4 inline-flex items-center gap-2 bg-[#C5A880] text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg self-start animate-pulse">
+                                        <Tag size={12} /> Cupón Aplicado: {promoCode}
+                                    </div>
+                                )}
+
                                 <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#C5A880] mb-4">
                                     Tu Refugio
                                 </span>
@@ -102,8 +112,8 @@ const BookingWidgetModal = () => {
                                     {roomType !== "Cualquier Suite" ? roomType : "Encuentra tu Espacio"}
                                 </h2>
                                 <p className="text-white/60 text-sm leading-relaxed">
-                                    {roomType !== "Cualquier Suite"
-                                        ? "Una excelente elección. Estás a un paso de confirmar tu paraíso privado."
+                                    {promoCode
+                                        ? "Selecciona tus fechas para validar la promoción exclusiva."
                                         : "Selecciona tus fechas para descubrir la disponibilidad en tiempo real."}
                                 </p>
                             </div>
@@ -111,18 +121,18 @@ const BookingWidgetModal = () => {
 
                         {/* COLUMNA DERECHA: FORMULARIO */}
                         <div className="w-full md:w-7/12 bg-white flex flex-col relative min-h-0">
-
-                            {/* --- ÁREA SCROLLABLE --- */}
                             <div className="overflow-y-auto p-6 md:p-10 custom-scrollbar flex-1">
-
                                 <div className="md:hidden mb-6 mt-2">
+                                    {promoCode && (
+                                        <span className="inline-block bg-[#C5A880]/10 text-[#C5A880] text-[10px] font-bold px-3 py-1 rounded-full mb-2 border border-[#C5A880]/20">
+                                            CUPÓN: {promoCode}
+                                        </span>
+                                    )}
                                     <h2 className="font-serif text-2xl md:text-3xl text-[#2C342C] mb-1">Reserva tu Estancia</h2>
-                                    <p className="text-gray-400 text-xs md:text-sm">Mejor precio garantizado</p>
                                 </div>
 
                                 <div className="space-y-4 md:space-y-6 pb-2">
-
-                                    {/* 1. SELECTOR FECHAS */}
+                                    {/* FECHAS */}
                                     <div>
                                         <label className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2">
                                             <CalendarDays size={14} /> Fechas de Estancia
@@ -137,7 +147,6 @@ const BookingWidgetModal = () => {
                                                 {activeTab === 'dates' ? 'CERRAR' : 'EDITAR'}
                                             </span>
                                         </button>
-
                                         <AnimatePresence>
                                             {activeTab === 'dates' && (
                                                 <motion.div
@@ -164,7 +173,7 @@ const BookingWidgetModal = () => {
                                         </AnimatePresence>
                                     </div>
 
-                                    {/* 2. SELECTOR HUÉSPEDES */}
+                                    {/* HUÉSPEDES */}
                                     <div>
                                         <label className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2">
                                             <Users size={14} /> Huéspedes
@@ -181,7 +190,6 @@ const BookingWidgetModal = () => {
                                                 {activeTab === 'guests' ? 'LISTO' : 'EDITAR'}
                                             </span>
                                         </button>
-
                                         <AnimatePresence>
                                             {activeTab === 'guests' && (
                                                 <motion.div
@@ -212,7 +220,7 @@ const BookingWidgetModal = () => {
                                         </AnimatePresence>
                                     </div>
 
-                                    {/* 3. SELECTOR DE HABITACIÓN (NUEVO) */}
+                                    {/* SUITE */}
                                     <div>
                                         <label className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2">
                                             <BedDouble size={14} /> Preferencia de Suite
@@ -227,7 +235,6 @@ const BookingWidgetModal = () => {
                                             </span>
                                             <ChevronDown size={16} className={`text-gray-400 transition-transform ${activeTab === 'room' ? 'rotate-180 text-[#C5A880]' : ''}`} />
                                         </button>
-
                                         <AnimatePresence>
                                             {activeTab === 'room' && (
                                                 <motion.div
@@ -252,11 +259,9 @@ const BookingWidgetModal = () => {
                                             )}
                                         </AnimatePresence>
                                     </div>
-
                                 </div>
                             </div>
 
-                            {/* --- ÁREA FIJA (Botón Sticky) --- */}
                             <div className="p-6 border-t border-gray-100 bg-white z-20 shrink-0">
                                 <button
                                     onClick={handleSearch}
@@ -268,7 +273,6 @@ const BookingWidgetModal = () => {
                                     <Check size={10} /> Tarifa más baja garantizada
                                 </p>
                             </div>
-
                         </div>
                     </motion.div>
                 </div>

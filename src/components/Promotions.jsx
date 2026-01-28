@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Snowflake, ArrowRight, Star, Sparkles, Tag } from 'lucide-react';
-// 1. IMPORTAR EL HOOK (Faltaba esto)
-import { useNavigate } from 'react-router-dom';
+// IMPORTAMOS CONTEXTO EN LUGAR DE NAVIGATE
+import { useBooking } from '../context/BookingContext';
 
 const offers = [
     {
@@ -50,8 +50,8 @@ const Marquee = ({ text }) => {
 };
 
 const Promotions = () => {
-    // 2. INICIALIZAR EL HOOK (Faltaba esto)
-    const navigate = useNavigate();
+    // USAMOS EL CONTEXTO
+    const { openBooking } = useBooking();
 
     return (
         <section className="bg-cream py-24 relative overflow-hidden">
@@ -93,8 +93,8 @@ const Promotions = () => {
                             whileHover={{ y: -15 }}
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
                             className="relative w-[320px] md:w-[400px] aspect-[3/4] group cursor-pointer"
-                            // Ahora sí funcionará porque 'navigate' ya existe
-                            onClick={() => navigate(`/booking?promo=${offer.code}`)}
+                            // AQUI ESTÁ LA CLAVE: Abrimos el modal pasando el código
+                            onClick={() => openBooking(null, offer.code)}
                         >
                             <div className="w-full h-full rounded-[2rem] overflow-hidden shadow-xl shadow-forest/5 relative">
                                 <img
@@ -134,7 +134,8 @@ const Promotions = () => {
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(`/booking?promo=${offer.code}`);
+                                            // CLAVE: También aquí usamos openBooking
+                                            openBooking(null, offer.code);
                                         }}
                                         className="text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2 group-hover:gap-4 transition-all hover:text-olive-accent text-cream/80"
                                     >
