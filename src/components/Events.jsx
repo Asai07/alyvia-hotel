@@ -164,10 +164,20 @@ const Events = () => {
                                                         {event.desc}
                                                     </p>
 
+                                                    {/* BOTÓN CORREGIDO */}
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            navigate('/events/plan', { state: { event } });
+                                                            // SOLUCIÓN: Limpiamos los iconos antes de enviar los datos
+                                                            const eventToSend = {
+                                                                ...event,
+                                                                icon: null, // Quitamos el icono principal (Componente)
+                                                                features: event.features.map(f => ({
+                                                                    ...f,
+                                                                    icon: null // Quitamos los iconos de las características
+                                                                }))
+                                                            };
+                                                            navigate('/events/plan', { state: { event: eventToSend } });
                                                         }}
                                                         className="group flex items-center gap-3 text-white font-bold uppercase text-[10px] md:text-xs tracking-[0.2em] border-b border-white/30 pb-2 hover:border-white transition-all"
                                                     >
