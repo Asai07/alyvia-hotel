@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
 // DATOS
@@ -68,6 +69,7 @@ const categories = [
 const Experiences = () => {
     const [activeTab, setActiveTab] = useState("Adventure");
     const activeData = experiencesData[activeTab];
+    const navigate = useNavigate();
 
     return (
         <section id="actividades" className="bg-white py-24 px-6 md:px-12 border-t border-forest/5">
@@ -175,7 +177,10 @@ const Experiences = () => {
                                     </div>
                                 </div>
 
-                                <button className="self-start group flex items-center gap-2 text-forest font-bold uppercase text-xs tracking-[0.2em] hover:text-olive-accent transition-colors duration-300">
+                                <button
+                                    onClick={() => navigate('/experiences/book', { state: { experience: activeData } })}
+                                    className="self-start group flex items-center gap-2 text-forest font-bold uppercase text-xs tracking-[0.2em] hover:text-olive-accent transition-colors duration-300"
+                                >
                                     Reservar Experiencia
                                     <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform duration-300" />
                                 </button>
