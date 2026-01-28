@@ -33,7 +33,7 @@ const events = [
         category: "Sedes y Galas",
         icon: Crown,
         desc: "Espacios versátiles de arquitectura impresionante para lanzamientos de marca, galas benéficas o celebraciones privadas.",
-        img: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070&auto=format&fit=crop"
+        img: "https://images.unsplash.com/photo-1769374071909-c2a0595553ae?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     }
 ];
 

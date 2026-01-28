@@ -65,7 +65,7 @@ const Promotions = () => {
             <div className="max-w-[1400px] mx-auto px-6 mb-4 relative z-10">
                 <div className="flex flex-col items-center text-center">
                     <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-olive-accent mb-6">
-                        <Snowflake size={14} /> Curaduría Estacional
+                        <Snowflake size={14} /> Promociones Invernales
                     </span>
                     <h2 className="font-serif text-5xl md:text-7xl text-forest leading-none mb-6">
                         Santuario de <span className="italic text-olive-light">Invierno</span>

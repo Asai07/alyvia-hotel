@@ -173,7 +173,7 @@ const Services = () => {
                                     </div>
                                 </div>
 
-                                <button className="w-full bg-[#1C1C1C] text-[#F2F0E9] py-4 rounded-xl flex items-center justify-between px-6 hover:bg-[#4A5D4F] transition-colors group mt-auto shadow-lg">
+                                <button className="w-full bg-forest text-[#F2F0E9] py-4 rounded-xl flex items-center justify-between px-6 hover:bg-[#4A5D4F] transition-colors group mt-auto shadow-lg">
                                     <span className="font-bold uppercase text-[10px] tracking-[0.2em]">Reservar Ahora</span>
                                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                                 </button>
