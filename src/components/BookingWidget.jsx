@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarDays, Users, BedDouble, ChevronDown, Minus, Plus } from 'lucide-react';
+import { CalendarDays, Users, BedDouble, ChevronDown, Minus, Plus, X, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -19,21 +19,26 @@ const BookingWidget = () => {
     // Control de Menús
     const [openMenu, setOpenMenu] = useState(null);
     const [menuPlacement, setMenuPlacement] = useState('bottom');
+    const [isMobile, setIsMobile] = useState(false); // Nuevo estado para control robusto
 
     // Referencias
     const widgetRef = useRef(null);
     const calendarPopupRef = useRef(null);
-    const navigate = useNavigate(); // <--- Hook de navegación
+    const navigate = useNavigate();
+
+    // --- DETECCIÓN DE MÓVIL ---
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const handleSearch = () => {
-        // 1. Validar que haya fechas seleccionadas
         if (!dateRange?.from || !dateRange?.to) {
             alert("Por favor selecciona las fechas de tu estadía.");
             return;
         }
-
-        // 2. Crear la URL con parámetros (Query Params)
-        // Esto es el estándar web para compartir búsquedas
         const params = new URLSearchParams({
             checkIn: dateRange.from.toISOString(),
             checkOut: dateRange.to.toISOString(),
@@ -41,15 +46,14 @@ const BookingWidget = () => {
             children: guests.children,
             roomType: roomType
         });
-
-        // 3. Redirigir a la página de resultados (que crearemos luego)
-        // La URL se verá tipo: /booking?checkIn=2026-01-27&adults=2...
         navigate(`/booking?${params.toString()}`);
     };
+
     // --- MANEJO DE CLICS EXTERNOS ---
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (!openMenu) return;
+            // En móvil, el backdrop maneja el cierre, así que esto es principalmente para desktop
             const isClickInsideWidget = widgetRef.current && widgetRef.current.contains(event.target);
             const isClickInsidePopup = calendarPopupRef.current && calendarPopupRef.current.contains(event.target);
 
@@ -61,16 +65,17 @@ const BookingWidget = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [openMenu]);
 
-    // --- POSICIÓN INTELIGENTE ---
+    // --- POSICIÓN INTELIGENTE (SOLO DESKTOP) ---
     const toggleMenu = (menu) => {
         if (openMenu === menu) {
             setOpenMenu(null);
             return;
         }
-        if (widgetRef.current) {
+        // Solo calculamos posición en desktop
+        if (!isMobile && widgetRef.current) {
             const rect = widgetRef.current.getBoundingClientRect();
             const spaceBelow = window.innerHeight - rect.bottom;
-            setMenuPlacement(spaceBelow < 350 ? 'top' : 'bottom');
+            setMenuPlacement(spaceBelow < 400 ? 'top' : 'bottom');
         }
         setOpenMenu(menu);
     };
@@ -80,27 +85,27 @@ const BookingWidget = () => {
             if (dateRange.to) {
                 return `${format(dateRange.from, 'dd MMM', { locale: es })} - ${format(dateRange.to, 'dd MMM', { locale: es })}`;
             }
-            return format(dateRange.from, 'dd MMM', { locale: es }) + " - (Selecciona salida)";
+            return format(dateRange.from, 'dd MMM', { locale: es }) + " - ...";
         }
         return "Seleccionar fechas";
     };
 
+    // --- CLASES DINÁMICAS (LA SOLUCIÓN ROBUSTA) ---
+    // En móvil usamos 'inset-0 m-auto' que centra vertical/horizontalmente sin depender de transform
+    const popupClasses = isMobile
+        ? "fixed inset-0 z-50 m-auto w-[90%] max-w-sm h-fit max-h-[85dvh] overflow-y-auto bg-white rounded-[1.5rem] shadow-2xl p-4 flex flex-col"
+        : `absolute z-50 bg-white p-6 rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden w-auto ${menuPlacement === 'top' ? 'bottom-full mb-4' : 'top-full mt-4'} left-0`;
 
-    const popupClasses = `
-    z-50 bg-white p-4 md:p-6 rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden
-    
-    /* MÓVIL: SIEMPRE CENTRADO (Ignora cálculos de JS) */
-    fixed left-4 right-4 top-1/2 -translate-y-1/2 w-auto max-h-[85dvh] overflow-y-auto shadow-[0_0_0_100vmax_rgba(0,0,0,0.6)]
-    
-    /* ESCRITORIO: Comportamiento Flotante (Calculado) */
-    md:fixed-none md:shadow-2xl md:inset-auto md:w-auto md:overflow-visible md:translate-y-0
-    ${menuPlacement === 'top' ? 'md:bottom-full md:mb-4' : 'md:top-full md:mt-4'} md:left-0
-`;
-    const animProps = {
+    // --- ANIMACIÓN CONDICIONAL ---
+    // En móvil animamos escala (zoom) para no romper el centrado. En desktop animamos Y (deslizamiento).
+    const animVariants = isMobile ? {
+        initial: { opacity: 0, scale: 0.9 },
+        animate: { opacity: 1, scale: 1 },
+        exit: { opacity: 0, scale: 0.9 }
+    } : {
         initial: { opacity: 0, y: menuPlacement === 'top' ? 10 : -10, scale: 0.95 },
         animate: { opacity: 1, y: 0, scale: 1 },
-        exit: { opacity: 0, y: menuPlacement === 'top' ? 10 : -10, scale: 0.95 },
-        transition: { duration: 0.2 }
+        exit: { opacity: 0, y: menuPlacement === 'top' ? 10 : -10, scale: 0.95 }
     };
 
     return (
@@ -135,53 +140,53 @@ const BookingWidget = () => {
                         <AnimatePresence>
                             {openMenu === 'dates' && (
                                 <>
-                                    {/* BACKDROP (Para cerrar al hacer clic fuera) */}
-                                    <motion.div
-                                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-                                        onClick={() => setOpenMenu(null)}
-                                    />
+                                    {/* BACKDROP MÓVIL */}
+                                    {isMobile && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                                            onClick={() => setOpenMenu(null)}
+                                        />
+                                    )}
 
-                                    {/* EL POPUP */}
+                                    {/* POPUP */}
                                     <motion.div
                                         ref={calendarPopupRef}
-                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                        {...animVariants}
+                                        transition={{ duration: 0.2 }}
                                         className={popupClasses}
                                         onMouseDown={(e) => e.stopPropagation()}
                                     >
                                         {/* Header Móvil */}
-                                        <div className="flex md:hidden justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                                        <div className="flex md:hidden justify-between items-center mb-4 pb-2 border-b border-gray-100 shrink-0">
                                             <span className="font-serif text-lg text-[#2C342C]">Seleccionar Fechas</span>
-                                            {/* Botón X discreto arriba */}
-                                            <button onClick={() => setOpenMenu(null)} className="p-2 text-gray-400 hover:text-[#2C342C]">
-                                                {/* Asegúrate de tener X importado de lucide-react, si no usa texto "X" */}
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 18 18" /></svg>
+                                            <button onClick={() => setOpenMenu(null)} className="p-2 text-gray-400 hover:text-[#C5A880]">
+                                                <X size={20} />
                                             </button>
                                         </div>
 
-                                        <DayPicker
-                                            mode="range"
-                                            selected={dateRange}
-                                            onSelect={setDateRange}
-                                            locale={es}
-                                            styles={{
-                                                root: { '--rdp-accent-color': '#2C342C', '--rdp-background-color': '#F2F0E9', margin: 0 },
-                                                day: { fontSize: '0.9rem' },
-                                                caption_label: { fontSize: '1rem', color: '#2C342C', fontFamily: 'serif' },
-                                                table: { maxWidth: '100%' }
-                                            }}
-                                        />
+                                        <div className="flex justify-center">
+                                            <DayPicker
+                                                mode="range"
+                                                selected={dateRange}
+                                                onSelect={setDateRange}
+                                                locale={es}
+                                                styles={{
+                                                    root: { '--rdp-accent-color': '#2C342C', '--rdp-background-color': '#F2F0E9', margin: 0 },
+                                                    day: { fontSize: '0.9rem' },
+                                                    caption_label: { fontSize: '1rem', color: '#2C342C', fontFamily: 'serif' },
+                                                    table: { maxWidth: '100%' }
+                                                }}
+                                            />
+                                        </div>
 
-                                        {/* --- NUEVO: BOTÓN GUARDAR (Solo Móvil) --- */}
-                                        <div className="mt-4 pt-4 border-t border-gray-100 md:hidden">
+                                        {/* Botón Guardar (Solo Móvil) */}
+                                        <div className="mt-4 pt-3 border-t border-gray-100 md:hidden shrink-0">
                                             <button
-                                                onClick={() => setOpenMenu(null)} // Simplemente cierra, los datos ya se guardaron en el state
-                                                className="w-full bg-[#2C342C] text-[#F2F0E9] py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
+                                                onClick={() => setOpenMenu(null)}
+                                                className="w-full bg-[#2C342C] text-[#F2F0E9] py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 hover:bg-[#1A211B]"
                                             >
-                                                Guardar Fechas
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                Guardar Fechas <Check size={16} />
                                             </button>
                                         </div>
                                     </motion.div>
@@ -211,49 +216,76 @@ const BookingWidget = () => {
 
                         <AnimatePresence>
                             {openMenu === 'guests' && (
-                                <motion.div
-                                    {...animProps}
-                                    className={`w-64 cursor-default ${popupClasses}`}
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                >
-                                    {/* Contador Adultos */}
-                                    <div className="flex justify-between items-center mb-6">
-                                        <div>
-                                            <p className="font-serif text-[#2C342C]">Adultos</p>
-                                            <p className="text-xs text-gray-400">Desde 13 años</p>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <button
-                                                onClick={() => setGuests(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
-                                                className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-[#F2F0E9] text-[#2C342C] transition-colors"
-                                            ><Minus size={14} /></button>
-                                            <span className="font-bold w-4 text-center text-[#2C342C]">{guests.adults}</span>
-                                            <button
-                                                onClick={() => setGuests(p => ({ ...p, adults: Math.max(1, p.adults + 1) }))}
-                                                className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-[#F2F0E9] text-[#2C342C] transition-colors"
-                                            ><Plus size={14} /></button>
-                                        </div>
-                                    </div>
+                                <>
+                                    {isMobile && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                                            onClick={() => setOpenMenu(null)}
+                                        />
+                                    )}
 
-                                    {/* Contador Niños */}
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <p className="font-serif text-[#2C342C]">Niños</p>
-                                            <p className="text-xs text-gray-400">2 - 12 años</p>
+                                    <motion.div
+                                        {...animVariants}
+                                        className={`${popupClasses} ${!isMobile ? 'w-72 cursor-default' : ''}`}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                    >
+                                        {/* Header Móvil */}
+                                        <div className="flex md:hidden justify-between items-center mb-6 pb-2 border-b border-gray-100">
+                                            <span className="font-serif text-lg text-[#2C342C]">Huéspedes</span>
+                                            <button onClick={() => setOpenMenu(null)}><X size={20} className="text-gray-400" /></button>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <button
-                                                onClick={() => setGuests(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
-                                                className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-[#F2F0E9] text-[#2C342C] transition-colors"
-                                            ><Minus size={14} /></button>
-                                            <span className="font-bold w-4 text-center text-[#2C342C]">{guests.children}</span>
-                                            <button
-                                                onClick={() => setGuests(p => ({ ...p, children: Math.max(0, p.children + 1) }))}
-                                                className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-[#F2F0E9] text-[#2C342C] transition-colors"
-                                            ><Plus size={14} /></button>
+
+                                        {/* Contadores */}
+                                        <div className="space-y-6">
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="font-serif text-[#2C342C] text-lg">Adultos</p>
+                                                    <p className="text-xs text-gray-400">Desde 13 años</p>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <button
+                                                        onClick={() => setGuests(p => ({ ...p, adults: Math.max(1, p.adults - 1) }))}
+                                                        className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-[#F2F0E9] text-[#2C342C]"
+                                                    ><Minus size={16} /></button>
+                                                    <span className="font-bold w-4 text-center text-[#2C342C] text-lg">{guests.adults}</span>
+                                                    <button
+                                                        onClick={() => setGuests(p => ({ ...p, adults: Math.max(1, p.adults + 1) }))}
+                                                        className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-[#F2F0E9] text-[#2C342C]"
+                                                    ><Plus size={16} /></button>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="font-serif text-[#2C342C] text-lg">Niños</p>
+                                                    <p className="text-xs text-gray-400">2 - 12 años</p>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <button
+                                                        onClick={() => setGuests(p => ({ ...p, children: Math.max(0, p.children - 1) }))}
+                                                        className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-[#F2F0E9] text-[#2C342C]"
+                                                    ><Minus size={16} /></button>
+                                                    <span className="font-bold w-4 text-center text-[#2C342C] text-lg">{guests.children}</span>
+                                                    <button
+                                                        onClick={() => setGuests(p => ({ ...p, children: Math.max(0, p.children + 1) }))}
+                                                        className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-[#F2F0E9] text-[#2C342C]"
+                                                    ><Plus size={16} /></button>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </motion.div>
+
+                                        {/* Botón Guardar (Solo Móvil) */}
+                                        <div className="mt-8 pt-4 border-t border-gray-100 md:hidden">
+                                            <button
+                                                onClick={() => setOpenMenu(null)}
+                                                className="w-full bg-[#2C342C] text-[#F2F0E9] py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
+                                            >
+                                                Listo <Check size={16} />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                </>
                             )}
                         </AnimatePresence>
                     </div>
@@ -269,30 +301,46 @@ const BookingWidget = () => {
                                 <span className="text-[10px] font-bold uppercase tracking-widest">Suite</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="font-serif text-[#2C342C] text-lg truncate">{roomType}</span>
+                                <span className="font-serif text-[#2C342C] text-lg truncate block max-w-[120px]">{roomType}</span>
                                 <ChevronDown size={14} className={`text-[#2C342C]/30 transition-transform ${openMenu === 'room' ? 'rotate-180' : ''}`} />
                             </div>
                         </div>
 
                         <AnimatePresence>
                             {openMenu === 'room' && (
-                                <motion.div
-                                    {...animProps}
-                                    className={`w-60 py-2 ${popupClasses}`}
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                >
-                                    {['Cualquier Suite', 'Ocean Villa', 'Garden Suite', 'The Penthouse'].map((room) => (
-                                        <div
-                                            key={room}
-                                            onClick={() => { setRoomType(room); setOpenMenu(null); }}
-                                            className={`px-6 py-3 hover:bg-[#F2F0E9] cursor-pointer transition-colors flex items-center justify-between
-                                            ${roomType === room ? 'bg-[#F2F0E9] font-bold text-[#1A211B]' : 'text-gray-600'}`}
-                                        >
-                                            <span className="text-sm font-serif">{room}</span>
-                                            {roomType === room && <div className="w-2 h-2 rounded-full bg-[#C5A880]"></div>}
+                                <>
+                                    {isMobile && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                                            onClick={() => setOpenMenu(null)}
+                                        />
+                                    )}
+
+                                    <motion.div
+                                        {...animVariants}
+                                        className={`${popupClasses} ${!isMobile ? 'w-64 py-2 cursor-default' : ''}`}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                    >
+                                        {/* Header Móvil */}
+                                        <div className="flex md:hidden justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                                            <span className="font-serif text-lg text-[#2C342C]">Preferencia Suite</span>
+                                            <button onClick={() => setOpenMenu(null)}><X size={20} className="text-gray-400" /></button>
                                         </div>
-                                    ))}
-                                </motion.div>
+
+                                        {['Cualquier Suite', 'Ocean Villa', 'Garden Suite', 'The Penthouse'].map((room) => (
+                                            <div
+                                                key={room}
+                                                onClick={() => { setRoomType(room); setOpenMenu(null); }}
+                                                className={`px-4 py-3 hover:bg-[#F2F0E9] cursor-pointer transition-colors flex items-center justify-between rounded-lg
+                                                ${roomType === room ? 'bg-[#F2F0E9] font-bold text-[#1A211B]' : 'text-gray-600'}`}
+                                            >
+                                                <span className="text-sm font-serif">{room}</span>
+                                                {roomType === room && <div className="w-2 h-2 rounded-full bg-[#C5A880]"></div>}
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                </>
                             )}
                         </AnimatePresence>
                     </div>
