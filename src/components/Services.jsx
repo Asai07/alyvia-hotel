@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, X, ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowUpRight, X, ArrowRight } from 'lucide-react';
 
 const services = [
     {
         id: 1,
-        title: "Bienestar y Spa", // Wellness & Spa
+        title: "Bienestar y Spa",
         category: "Relajación",
         img: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?q=80&w=2070&auto=format&fit=crop",
         description: "Desconecta del mundo en nuestro santuario subterráneo. Nuestros tratamientos fusionan técnicas ancestrales con ingredientes orgánicos para restaurar tu equilibrio interior.",
@@ -13,7 +13,7 @@ const services = [
     },
     {
         id: 2,
-        title: "Cena Michelin", // Michelin Dining
+        title: "Cena Michelin",
         category: "Gastronomía",
         img: "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974&auto=format&fit=crop",
         description: "Un viaje culinario guiado por el Chef Marco Pierre. Experimenta un menú degustación de 7 tiempos que celebra los sabores locales con un toque moderno.",
@@ -21,15 +21,15 @@ const services = [
     },
     {
         id: 3,
-        title: "Yate Privado", // Private Yachting
+        title: "Yate Privado",
         category: "Aventura",
-        img: "https://plus.unsplash.com/premium_photo-1682377521541-36f0ccecd189?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        img: "https://plus.unsplash.com/premium_photo-1682377521541-36f0ccecd189?q=80&w=1332&auto=format&fit=crop",
         description: "Explora calas ocultas y playas vírgenes a bordo de nuestro yate privado de 60 pies. Incluye servicio de champaña y capitán privado.",
         details: { time: "Duración: 4 Horas", price: "desde $800" }
     },
     {
         id: 4,
-        title: "Cine de Medianoche", // Midnight Cinema
+        title: "Cine de Medianoche",
         category: "Entretenimiento",
         img: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop",
         description: "Disfruta de películas clásicas bajo las estrellas en nuestro anfiteatro al aire libre. Palomitas gourmet y mantas de cortesía incluidas.",
@@ -53,15 +53,15 @@ const Services = () => {
             {/* FONDO DECORATIVO */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/noise-lines.png')]"></div>
 
-            {/* FONDO IMAGEN CAMBIANTE */}
-            <AnimatePresence mode="wait">
+            {/* FONDO IMAGEN CAMBIANTE (Optimizado: Sin mode='wait' para evitar parpadeo) */}
+            <AnimatePresence>
                 {activeImg && !selectedService && (
                     <motion.div
                         key={activeImg}
-                        initial={{ opacity: 0, scale: 1.1 }}
-                        animate={{ opacity: 0.15, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.8 }}
+                        initial={{ opacity: 0 }} // Entrada suave
+                        animate={{ opacity: 0.15 }} // Opacidad final
+                        exit={{ opacity: 0 }} // Salida suave
+                        transition={{ duration: 0.6 }} // Transición fluida
                         className="absolute inset-0 z-0 pointer-events-none"
                     >
                         <img src={activeImg} alt="bg" className="w-full h-full object-cover filter grayscale contrast-125" />
@@ -82,20 +82,24 @@ const Services = () => {
                     {services.map((service, index) => (
                         <motion.div
                             key={service.id}
+                            // 1. CORRECCIÓN PRINCIPAL: Eliminamos el delay secuencial
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
+                            viewport={{ once: true, margin: "-50px" }} // Margen para que no aparezca tan al borde
+                            transition={{ duration: 0.5, ease: "easeOut" }} // Sin delay = Sin efecto "uno por uno"
+
                             onMouseEnter={() => { setActiveImg(service.img); setHoveredIndex(index); }}
                             onMouseLeave={() => setActiveImg(null)}
                             onClick={() => setSelectedService(service)}
+
+                            // 2. CORRECCIÓN HOVER: Quitamos 'blur' para mejor rendimiento y menos parpadeo
                             className={`group relative border-b border-black/10 py-12 cursor-pointer flex justify-between items-center transition-all duration-500
-                                ${hoveredIndex !== null && hoveredIndex !== index ? 'opacity-30 blur-[1px]' : 'opacity-100'}
+                                ${hoveredIndex !== null && hoveredIndex !== index ? 'opacity-30' : 'opacity-100'}
                             `}
                         >
                             <div className="flex items-baseline gap-8 md:gap-16">
                                 <span className="text-xs font-mono text-black/40 group-hover:text-black transition-colors">0{service.id}</span>
-                                <h3 className="font-serif text-5xl md:text-7xl text-[#1C1C1C] group-hover:italic group-hover:translate-x-4 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]">
+                                <h3 className="font-serif text-3xl md:text-5xl lg:text-7xl text-[#1C1C1C] group-hover:italic group-hover:translate-x-4 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]">
                                     {service.title}
                                 </h3>
                             </div>
@@ -113,7 +117,7 @@ const Services = () => {
                 </div>
             </div>
 
-            {/* MODAL */}
+            {/* MODAL (Sin cambios funcionales, solo estética) */}
             <AnimatePresence>
                 {selectedService && (
                     <motion.div
@@ -167,7 +171,7 @@ const Services = () => {
 
                             {/* Columna Derecha */}
                             <motion.div
-                                className="w-full md:w-[45%] p-8 md:p-16 flex flex-col justify-between bg-[#F2F0E9]"
+                                className="w-full md:w-[45%] p-8 md:p-16 flex flex-col justify-between bg-[#F2F0E9] overflow-y-auto"
                                 initial="hidden"
                                 animate="visible"
                                 variants={{
@@ -179,7 +183,7 @@ const Services = () => {
                                         <span className="text-xs font-bold tracking-[0.3em] uppercase text-[#4A5D4F]">Experiencia</span>
                                     </motion.div>
 
-                                    <motion.h3 variants={modalContentVariants} className="font-serif text-5xl md:text-6xl text-[#1C1C1C] mb-8 leading-[1.1]">
+                                    <motion.h3 variants={modalContentVariants} className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#1C1C1C] mb-6 md:mb-8 leading-[1.1]">
                                         {selectedService.title}
                                     </motion.h3>
 

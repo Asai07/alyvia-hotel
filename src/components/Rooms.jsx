@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, CalendarCheck } from 'lucide-react';
 // 1. IMPORTAR EL HOOK DEL CONTEXTO
@@ -38,6 +38,16 @@ const Rooms = () => {
     // 2. OBTENER LA FUNCIÓN DEL CONTEXTO
     const { openBooking } = useBooking();
 
+    // DETECTAR MÓVIL PARA AJUSTAR ANIMACIÓN
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024); // lg breakpoint
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     return (
         <section id="habitaciones" className="bg-olive py-32 px-6 relative overflow-hidden">
 
@@ -55,6 +65,7 @@ const Rooms = () => {
                             viewport={{ once: true }}
                             className="flex items-center gap-2 text-olive-accent mb-4"
                         >
+                            <Sparkles size={16} />
                             <span className="text-xs font-bold tracking-[0.3em] uppercase">Alojamiento</span>
                         </motion.div>
 
@@ -69,10 +80,20 @@ const Rooms = () => {
                     {rooms.map((room, index) => (
                         <motion.div
                             key={room.id}
-                            initial={{ opacity: 0, y: 60 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8, delay: index * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                            // ANIMACIÓN OPTIMIZADA
+                            initial={{ opacity: 0, y: 40, scale: 0.95 }} // Añadimos escala pequeña inicial
+                            whileInView={{ opacity: 1, y: 0, scale: 1 }} // Al entrar, crece suavemente
+                            viewport={{
+                                once: true,
+                                amount: 0.2, // Se activa cuando el 20% de la tarjeta es visible
+                                margin: "0px 0px -50px 0px" // Margen de seguridad inferior
+                            }}
+                            transition={{
+                                duration: 0.8,
+                                // CLAVE: En móvil delay casi cero. En PC mantenemos el efecto cascada.
+                                delay: isMobile ? 0.05 : index * 0.15,
+                                ease: [0.22, 1, 0.36, 1] // Curva "Bezier de lujo"
+                            }}
                             className="group relative bg-cream rounded-[2.5rem] p-3 shadow-2xl hover:-translate-y-2 transition-transform duration-500 flex flex-col"
                         >
 
