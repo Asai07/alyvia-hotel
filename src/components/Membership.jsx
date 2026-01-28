@@ -1,21 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { Crown, Star, Infinity, Check, ArrowRight, Mail } from 'lucide-react';
-// Importamos el hook de reserva por si queremos usarlo en el nivel gratis
 import { useBooking } from '../context/BookingContext';
 
 const Membership = () => {
-    const navigate = useNavigate();
     const { openBooking } = useBooking();
 
-    // Lógica de botones
     const handleAction = (tier) => {
         if (tier.actionType === 'booking') {
-            // Nivel Gratis: Lleva a reservar o podrías llevar a un /login
             openBooking();
         } else if (tier.actionType === 'email') {
-            // Niveles de Pago: Abre correo para atención personalizada
             window.location.href = `mailto:concierge@alyvia.com?subject=Solicitud de Membresía ${tier.name}&body=Hola, estoy interesado en unirme al nivel ${tier.name}.`;
         }
     };
@@ -59,15 +53,15 @@ const Membership = () => {
     return (
         <section id="membresia" className="bg-[#F9F9F7] py-32 px-6 relative overflow-hidden">
 
-            {/* Decoración de Fondo Sutil (Estilo About) */}
+            {/* Fondo Sutil */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-30">
-                <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-[#C5A880]/10 rounded-full blur-[100px] will-change-transform"></div>
-                <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-[#2C342C]/5 rounded-full blur-[100px] will-change-transform"></div>
+                <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-[#C5A880]/10 rounded-full blur-[100px]"></div>
+                <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-[#2C342C]/5 rounded-full blur-[100px]"></div>
             </div>
 
             <div className="max-w-7xl mx-auto relative z-10">
 
-                {/* HEADER (Colores oscuros sobre fondo claro) */}
+                {/* Header */}
                 <div className="text-center mb-24">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -89,7 +83,7 @@ const Membership = () => {
                     </motion.h2>
                 </div>
 
-                {/* GRID DE TARJETAS */}
+                {/* Grid de Tarjetas */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-center">
                     {tiers.map((tier, index) => (
                         <Card
@@ -106,7 +100,7 @@ const Membership = () => {
     );
 };
 
-// Componente Tarjeta (Diseño Ajustado: Forest Green vs White)
+// Componente Tarjeta Optimizado (CSS Transitions > JS Animations para evitar lag)
 const Card = ({ tier, index, onAction }) => {
     const isHighlight = tier.highlight;
 
@@ -116,24 +110,25 @@ const Card = ({ tier, index, onAction }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "50px" }}
             transition={{ delay: index * 0.1, duration: 0.5 }}
+            // CLAVE: Usamos clases CSS estándar para el hover, no motion values. Esto elimina el parpadeo.
             className={`
-                relative flex flex-col p-8 md:p-10 rounded-[2.5rem] transition-all duration-500 transform-gpu will-change-transform
+                relative flex flex-col p-8 md:p-10 rounded-[2.5rem] transition-all duration-300 ease-out
                 ${isHighlight
-                    ? 'bg-[#2C342C] text-[#F2F0E9] shadow-2xl shadow-[#2C342C]/20 scale-100 lg:scale-110 z-10 border border-[#2C342C]'
-                    : 'bg-white text-[#2C342C] border border-[#2C342C]/5 hover:border-[#C5A880]/30 hover:shadow-xl hover:shadow-[#C5A880]/5'
+                    ? 'bg-[#2C342C] text-[#F2F0E9] shadow-2xl shadow-[#2C342C]/20 scale-100 lg:scale-105 z-10 border border-[#2C342C] hover:shadow-3xl hover:-translate-y-1'
+                    : 'bg-white text-[#2C342C] border border-[#2C342C]/5 hover:border-[#C5A880]/30 hover:shadow-xl hover:shadow-[#C5A880]/5 hover:-translate-y-1'
                 }
             `}
         >
-            {/* Badge para la destacada */}
+            {/* Badge */}
             {isHighlight && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#C5A880] text-[#2C342C] text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg z-20">
                     Más Solicitado
                 </div>
             )}
 
-            {/* Icono Header */}
+            {/* Icono */}
             <div className="mb-8">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 hover:scale-110
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110
                     ${isHighlight ? 'bg-white/10 text-[#C5A880]' : 'bg-[#F9F9F7] text-[#2C342C]'}
                 `}>
                     <tier.icon size={24} />
@@ -156,11 +151,11 @@ const Card = ({ tier, index, onAction }) => {
                 </div>
             </div>
 
-            {/* Lista Features */}
+            {/* Lista */}
             <ul className="space-y-4 mb-10 flex-grow">
                 {tier.features.map((feat, i) => (
                     <li key={i} className={`flex items-start gap-3 text-sm ${isHighlight ? 'text-white/80' : 'text-gray-600'}`}>
-                        <div className={`mt-0.5 rounded-full p-0.5 
+                        <div className={`mt-0.5 rounded-full p-0.5 shrink-0
                             ${isHighlight ? 'bg-[#C5A880] text-[#2C342C]' : 'bg-[#2C342C]/10 text-[#2C342C]'}
                         `}>
                             <Check size={10} strokeWidth={3} />
@@ -170,7 +165,7 @@ const Card = ({ tier, index, onAction }) => {
                 ))}
             </ul>
 
-            {/* Botón Funcional */}
+            {/* Botón */}
             <button
                 onClick={onAction}
                 className={`

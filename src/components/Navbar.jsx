@@ -21,15 +21,23 @@ const Navbar = () => {
     const handleNavClick = (e, link) => {
         if (location.pathname === '/') {
             e.preventDefault();
+
+            // 1. FORZAMOS EL RE-CÁLCULO DE ALTURA
+            lenis?.resize();
+
             if (link.path === '/') {
                 lenis?.scrollTo(0, { duration: 1.5 });
             } else {
                 const targetId = link.path.replace('/', '');
-                lenis?.scrollTo(targetId, {
-                    offset: -100,
-                    duration: 1.5,
-                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-                });
+                const element = document.getElementById(targetId);
+
+                if (element) {
+                    lenis?.scrollTo(element, { // Pasamos el elemento directo, es más seguro
+                        offset: -80, // Ajuste para el header
+                        duration: 1.5,
+                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+                    });
+                }
             }
         }
     };
@@ -66,12 +74,8 @@ const Navbar = () => {
                 ))}
             </ul>
 
-            {/* Acciones (Solo botón Reservar ahora) */}
+            {/* Botón Reservar */}
             <div className="flex items-center gap-4">
-                {/* Si en el futuro quieres un cambio de idioma (ES | EN), 
-                   este sería el lugar perfecto para ponerlo en lugar del buscador.
-                */}
-
                 <button
                     onClick={() => openBooking()}
                     className="bg-[#2C342C] text-[#F2F0E9] px-6 py-3 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-[#1A211B] transition-all shadow-lg shadow-[#2C342C]/20 hover:shadow-[#2C342C]/40 active:scale-95"
