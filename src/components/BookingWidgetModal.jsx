@@ -76,8 +76,7 @@ const BookingWidgetModal = () => {
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl z-10 overflow-hidden flex flex-col md:flex-row max-h-[85vh] h-auto"
-                    >
+                        className="relative bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl z-10 overflow-hidden flex flex-col md:flex-row max-h-[85dvh] h-auto mx-4"                    >
                         {/* BOTÓN CERRAR */}
                         <button
                             onClick={closeBooking}

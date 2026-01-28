@@ -60,7 +60,13 @@ const PromoModal = () => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="relative w-full max-w-4xl bg-[#2C342C] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[85vh]"
+                        className="
+        relative w-full max-w-4xl bg-[#2C342C] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row
+        /* CAMBIOS CLAVE AQUÍ: */
+        max-h-[85dvh]  /* Usar dvh (Dynamic Viewport Height) evita problemas con la barra de URL */
+        h-auto         /* Altura automática basada en contenido */
+        mx-4           /* Margen lateral para que no toque los bordes */
+    "
                     >
 
                         <button

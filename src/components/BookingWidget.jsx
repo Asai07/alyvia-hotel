@@ -87,9 +87,16 @@ const BookingWidget = () => {
 
 
     // Clases dinámicas de posición
-    const popupClasses = `absolute left-0 z-50 bg-white p-6 rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden 
-        ${menuPlacement === 'top' ? 'bottom-full mb-4' : 'top-full mt-4'}`;
-
+    const popupClasses = `
+    z-50 bg-white p-4 md:p-6 rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden
+    
+    /* MÓVIL (Fixed y Centrado) */
+    fixed inset-x-4 top-1/2 -translate-y-1/2 w-auto max-h-[80vh] overflow-y-auto
+    
+    /* ESCRITORIO (Absolute y Dropdown) */
+    md:absolute md:inset-auto md:w-auto md:overflow-visible md:translate-y-0
+    ${menuPlacement === 'top' ? 'md:bottom-full md:mb-4' : 'md:top-full md:mt-4'} md:left-0
+`;
     const animProps = {
         initial: { opacity: 0, y: menuPlacement === 'top' ? 10 : -10, scale: 0.95 },
         animate: { opacity: 1, y: 0, scale: 1 },
@@ -128,76 +135,44 @@ const BookingWidget = () => {
 
                         <AnimatePresence>
                             {openMenu === 'dates' && (
-                                <motion.div
-                                    ref={calendarPopupRef}
-                                    {...animProps}
-                                    className={popupClasses}
-                                    // STOP PROPAGATION: Esto evita el cierre al clickear dentro
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                >
-                                    <DayPicker
-                                        mode="range"
-                                        selected={dateRange}
-                                        onSelect={setDateRange}
-                                        locale={es}
-                                        showOutsideDays
-                                        styles={{
-                                            root: {
-                                                '--rdp-accent-color': '#2C342C',
-                                                '--rdp-accent-color-dark': '#2C342C',
-                                                '--rdp-background-color': '#F2F0E9',
-                                            },
-
-                                            caption_label: {
-                                                fontFamily: 'ui-serif, Georgia, serif',
-                                                fontSize: '1.1rem',
-                                                color: '#2C342C',
-                                                textTransform: 'capitalize',
-                                            },
-
-                                            nav_button: {
-                                                color: '#2C342C',
-                                                borderRadius: '999px',
-                                            },
-
-                                            day: {
-                                                width: 42,
-                                                height: 42,
-                                                fontSize: '0.85rem',
-                                                fontWeight: 500,
-                                                color: '#2C342C',
-                                                borderRadius: '999px',
-                                            },
-
-                                            day_today: {
-                                                color: '#C5A880',
-                                                fontWeight: 700,
-                                            },
-
-                                            day_selected: {
-                                                backgroundColor: '#2C342C',
-                                                color: '#F2F0E9',
-                                            },
-
-                                            day_range_start: {
-                                                backgroundColor: '#2C342C',
-                                                color: '#F2F0E9',
-                                            },
-
-                                            day_range_end: {
-                                                backgroundColor: '#2C342C',
-                                                color: '#F2F0E9',
-                                            },
-
-                                            day_range_middle: {
-                                                backgroundColor: '#F2F0E9',
-                                                color: '#2C342C',
-                                            },
-                                        }}
+                                <>
+                                    {/* BACKDROP PARA MÓVIL (Detecta clic fuera y oscurece fondo) */}
+                                    <motion.div
+                                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+                                        onClick={() => setOpenMenu(null)}
                                     />
 
+                                    {/* EL POPUP */}
+                                    <motion.div
+                                        ref={calendarPopupRef}
+                                        initial={{ opacity: 0, scale: 0.95, y: 10 }} // Animación ajustada
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                        className={popupClasses} // <--- Usamos las clases nuevas
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                    >
+                                        {/* Botón Cerrar para móvil (UX Vital) */}
+                                        <div className="flex md:hidden justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                                            <span className="font-serif text-lg text-[#2C342C]">Seleccionar Fechas</span>
+                                            <button onClick={() => setOpenMenu(null)} className="text-xs font-bold text-[#C5A880] uppercase">Cerrar</button>
+                                        </div>
 
-                                </motion.div>
+                                        <DayPicker
+                                            mode="range"
+                                            selected={dateRange}
+                                            onSelect={setDateRange}
+                                            locale={es}
+                                            // IMPORTANTE: Ajustar tamaño de fuente para móviles pequeños
+                                            styles={{
+                                                root: { '--rdp-accent-color': '#2C342C', '--rdp-background-color': '#F2F0E9', margin: 0 },
+                                                day: { fontSize: '0.8rem' }, // Letra más chica
+                                                caption_label: { fontSize: '1rem', color: '#2C342C', fontFamily: 'serif' },
+                                                table: { maxWidth: '100%' } // Asegurar que no se desborde
+                                            }}
+                                        />
+                                    </motion.div>
+                                </>
                             )}
                         </AnimatePresence>
                     </div>
