@@ -47,7 +47,7 @@ const events = [
             { title: "Estilismo", desc: "Asesoría de vestuario", icon: <Crown size={18} /> },
             { title: "Edición", desc: "Retoque estilo Fine Art", icon: <Sun size={18} /> }
         ],
-        img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=2000&auto=format&fit=crop"
+        img: "https://images.unsplash.com/photo-1598182899718-d4e7f6bf2b91?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         id: "04",
