@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const restaurants = [
     {
@@ -51,6 +52,7 @@ const restaurants = [
 ];
 
 const RestaurantItem = ({ data, index }) => {
+    const navigate = useNavigate();
     const ref = useRef(null);
 
     const { scrollYProgress } = useScroll({
@@ -107,7 +109,10 @@ const RestaurantItem = ({ data, index }) => {
                         <span className="text-sm font-medium tracking-wide">{data.open}</span>
                     </div>
 
-                    <button className="group flex items-center gap-2 text-cream font-bold uppercase text-xs tracking-[0.2em] hover:text-olive-accent transition-colors">
+                    <button
+                        onClick={() => navigate('/dining/book', { state: { restaurant: data } })}
+                        className="group flex items-center gap-2 text-cream font-bold uppercase text-xs tracking-[0.2em] hover:text-olive-accent transition-colors"
+                    >
                         Reservar Mesa
                         <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform duration-300" />
                     </button>

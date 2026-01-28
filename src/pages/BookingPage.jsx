@@ -55,7 +55,9 @@ const ROOMS_DB = [
 const BookingPage = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
     // RECUPERAR DATOS URL
     const checkIn = searchParams.get('checkIn') ? new Date(searchParams.get('checkIn')) : new Date();
     const checkOut = searchParams.get('checkOut') ? new Date(searchParams.get('checkOut')) : new Date();
