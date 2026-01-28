@@ -1,11 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const img1 = "/imagenes-hotel/vista-pool.webp";
 const img2 = "/imagenes-hotel/vista-mar.webp";
 
 const About = () => {
+    const navigate = useNavigate();
     return (
         <section id="nosotros" className="bg-cream py-32 relative overflow-hidden">
             {/* Elemento Decorativo SVG */}
@@ -57,6 +59,8 @@ const About = () => {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.6 }}
+                        // 3. CAMBIAR LA ACCIÓN DEL BOTÓN
+                        onClick={() => navigate('/about')}
                         className="group flex items-center gap-3 text-black font-semibold border-b border-black pb-1 hover:text-gray-600 hover:border-gray-600 transition-all"
                     >
                         Descubre Nuestra Historia

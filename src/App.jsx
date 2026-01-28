@@ -12,6 +12,7 @@ import BookingWidgetModal from './components/BookingWidgetModal';
 import ServiceBookingPage from './pages/ServiceBookingPage';
 import RestaurantBookingPage from './pages/RestaurantBookingPage';
 import ExperienceBookingPage from './pages/ExperienceBookingPage';
+import AboutPage from './pages/AboutPage';
 
 function App() {
   // CONFIGURACIÓN PREMIUM DE LENIS
@@ -31,6 +32,7 @@ function App() {
           <BookingWidgetModal />
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/booking" element={<BookingPage />} />
