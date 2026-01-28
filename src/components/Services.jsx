@@ -47,6 +47,7 @@ const Services = () => {
     const [selectedService, setSelectedService] = useState(null);
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [isMobile, setIsMobile] = useState(false);
+    const navigate = useNavigate();
 
     // Detectar móvil para desactivar efectos hover pesados
     useEffect(() => {
@@ -173,10 +174,20 @@ const Services = () => {
                                     </div>
                                 </div>
 
-                                <button className="w-full bg-forest text-[#F2F0E9] py-4 rounded-xl flex items-center justify-between px-6 hover:bg-[#4A5D4F] transition-colors group mt-auto shadow-lg">
-                                    <span className="font-bold uppercase text-[10px] tracking-[0.2em]">Reservar Ahora</span>
-                                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                                </button>
+                                <motion.button
+                                    variants={modalContentVariants}
+                                    // CAMBIO AQUÍ:
+                                    onClick={() => {
+                                        // Cerramos el modal primero (opcional, pero limpio)
+                                        setSelectedService(null);
+                                        // Navegamos pasando el servicio como estado
+                                        navigate('/services/book', { state: { service: selectedService } });
+                                    }}
+                                    className="w-full bg-[#1C1C1C] text-[#F2F0E9] py-5 rounded-2xl flex items-center justify-between px-8 hover:bg-[#4A5D4F] transition-colors duration-500 group mt-8 md:mt-0 shadow-xl"
+                                >
+                                    <span className="font-bold uppercase text-xs tracking-[0.2em]">Reservar Ahora</span>
+                                    <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform duration-300" />
+                                </motion.button>
                             </div>
                         </motion.div>
                     </motion.div>

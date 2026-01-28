@@ -9,6 +9,7 @@ import BookingPage from './pages/BookingPage';
 import CheckoutPage from './pages/CheckOutPage';
 import { BookingProvider } from './context/BookingContext';
 import BookingWidgetModal from './components/BookingWidgetModal';
+import ServiceBookingPage from './pages/ServiceBookingPage';
 function App() {
   return (
     <BookingProvider>
@@ -21,6 +22,7 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/services/book" element={<ServiceBookingPage />} />
           </Routes>
         </Router>
       </ReactLenis>
