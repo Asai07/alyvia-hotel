@@ -132,7 +132,7 @@ const Restaurants = () => {
             <div className="max-w-[1400px] mx-auto relative z-10">
 
                 <div className="text-center mb-32">
-                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-cream/40 block mb-4">
+                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-olive-accent block mb-4">
                         Colección Culinaria
                     </span>
                     <h2 className="font-serif text-5xl md:text-7xl text-cream">
