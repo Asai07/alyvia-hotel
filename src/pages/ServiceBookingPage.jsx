@@ -9,8 +9,13 @@ const ServiceBookingPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Recuperamos el servicio que el usuario seleccionó en la página anterior
     const serviceData = location.state?.service;
+
+    // 1. SOLUCIÓN AL PROBLEMA DEL SCROLL:
+    // Forzamos que la vista empiece arriba al cargar la página
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     // Redirigir si alguien entra directo sin seleccionar servicio
     useEffect(() => {
@@ -32,9 +37,7 @@ const ServiceBookingPage = () => {
         setError('');
         setLoading(true);
 
-        // SIMULACIÓN DE BACKEND
         setTimeout(() => {
-            // CÓDIGO DEMO: Validamos si la habitación es "101"
             if (guestInfo.roomNumber === '101') {
                 setLoading(false);
                 setStep(2);
@@ -75,7 +78,7 @@ const ServiceBookingPage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-                    {/* COLUMNA IZQUIERDA: RESUMEN DEL SERVICIO */}
+                    {/* COLUMNA IZQUIERDA: RESUMEN */}
                     <div className="md:col-span-1">
                         <div className="bg-white p-6 rounded-[2rem] shadow-lg border border-[#2C342C]/5 sticky top-32">
                             <div className="aspect-square rounded-2xl overflow-hidden mb-6 relative">
@@ -105,7 +108,7 @@ const ServiceBookingPage = () => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA: FORMULARIOS DINÁMICOS */}
+                    {/* COLUMNA DERECHA: FORMULARIOS */}
                     <div className="md:col-span-2">
                         <AnimatePresence mode="wait">
 

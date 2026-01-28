@@ -184,7 +184,7 @@ const Services = () => {
                                         // Navegamos pasando el servicio como estado
                                         navigate('/services/book', { state: { service: selectedService } });
                                     }}
-                                    className="w-full bg-[#1C1C1C] text-[#F2F0E9] py-5 rounded-2xl flex items-center justify-between px-8 hover:bg-[#4A5D4F] transition-colors duration-500 group mt-8 md:mt-0 shadow-xl"
+                                    className="w-full bg-forest text-[#F2F0E9] py-5 rounded-2xl flex items-center justify-between px-8 hover:bg-[#4A5D4F] transition-colors duration-500 group mt-8 md:mt-0 shadow-xl"
                                 >
                                     <span className="font-bold uppercase text-xs tracking-[0.2em]">Reservar Ahora</span>
                                     <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform duration-300" />
