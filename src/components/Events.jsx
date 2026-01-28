@@ -1,44 +1,74 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Heart, GlassWater, Crown, ArrowUpRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Camera, Heart, GlassWater, Crown, ArrowUpRight, Users, Music, Sun } from 'lucide-react';
 
 const events = [
     {
         id: "01",
-        title: "Uniones Eternas", // Eternal Unions
+        title: "Uniones Eternas",
         category: "Bodas y Capilla",
         icon: Heart,
         desc: "Desde nuestra capilla de cristal en el acantilado hasta recepciones bajo las estrellas. Diseñamos bodas que trascienden el tiempo.",
+        longDesc: "Imagina decir 'Sí, acepto' suspendido entre el cielo y el mar. Nuestra capilla de cristal ofrece una vista panorámica ininterrumpida del océano, creando un telón de fondo etéreo para tu ceremonia. Nos encargamos de cada detalle, desde el diseño floral hasta la coordinación del día, para que tú solo te preocupes de vivir el momento.",
+        features: [
+            { title: "Capacidad", desc: "Hasta 200 invitados", icon: <Users size={18} /> },
+            { title: "Locaciones", desc: "Capilla, Playa o Jardín", icon: <Sun size={18} /> },
+            { title: "Banquete", desc: "Menú de autor por Chef Pierre", icon: <GlassWater size={18} /> },
+            { title: "Coordinación", desc: "Wedding Planner dedicada", icon: <Heart size={18} /> }
+        ],
         img: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070&auto=format&fit=crop"
     },
     {
         id: "02",
-        title: "La Propuesta", // The Proposal
+        title: "La Propuesta",
         category: "Momentos Románticos",
         icon: GlassWater,
         desc: "El 'Sí' más importante. Organizamos cenas privadas en la playa, decoración floral oculta y música de violín en vivo.",
+        longDesc: "Diseñamos la atmósfera perfecta para la pregunta más importante de tu vida. Ya sea una cena privada en una cueva iluminada por velas, o un picnic de lujo en una playa virgen al atardecer. Nuestro equipo de 'Cómplices' te ayudará a planear la sorpresa perfecta sin levantar sospechas.",
+        features: [
+            { title: "Privacidad", desc: "Zonas exclusivas reservadas", icon: <Crown size={18} /> },
+            { title: "Música", desc: "Violinista o Trío en vivo", icon: <Music size={18} /> },
+            { title: "Fotografía", desc: "Fotógrafo oculto incluido", icon: <Camera size={18} /> },
+            { title: "Decoración", desc: "Floral y pirotecnia fría", icon: <Heart size={18} /> }
+        ],
         img: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=2070&auto=format&fit=crop"
     },
     {
         id: "03",
-        title: "Legado Visual", // Visual Legacy
+        title: "Legado Visual",
         category: "Estudio Fotográfico",
         icon: Camera,
         desc: "No dejes que el momento se desvanezca. Nuestro equipo in-house de fotógrafos editoriales captura tu historia con estética de cine.",
+        longDesc: "No dejes que tus recuerdos se desvanezcan. Aprovecha la arquitectura impresionante de Alyvia y la luz dorada de nuestros atardeceres. Sesiones editoriales para parejas, familias o maternidad, dirigidas por fotógrafos de moda y estilo de vida.",
+        features: [
+            { title: "Entrega", desc: "Galería digital en 48 hrs", icon: <ArrowUpRight size={18} /> },
+            { title: "Drone", desc: "Tomas aéreas 4K incluidas", icon: <Camera size={18} /> },
+            { title: "Estilismo", desc: "Asesoría de vestuario", icon: <Crown size={18} /> },
+            { title: "Edición", desc: "Retoque estilo Fine Art", icon: <Sun size={18} /> }
+        ],
         img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=2000&auto=format&fit=crop"
     },
     {
         id: "04",
-        title: "Grandes Salones", // Grand Halls
+        title: "Grandes Salones",
         category: "Sedes y Galas",
         icon: Crown,
         desc: "Espacios versátiles de arquitectura impresionante para lanzamientos de marca, galas benéficas o celebraciones privadas.",
-        img: "https://images.unsplash.com/photo-1769374071909-c2a0595553ae?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        longDesc: "La sofisticación se encuentra con la tecnología. Nuestros salones 'Grand Horizon' ofrecen techos de doble altura, acústica perfecta y ventanales de piso a techo. Ideales para conferencias corporativas de alto nivel, lanzamientos de productos o galas benéficas.",
+        features: [
+            { title: "Aforo", desc: "Hasta 500 personas", icon: <Users size={18} /> },
+            { title: "Tecnología", desc: "Pantallas LED y Sonido Bose", icon: <Music size={18} /> },
+            { title: "Catering", desc: "Coffee Break a Cena de Gala", icon: <GlassWater size={18} /> },
+            { title: "Logística", desc: "Acceso independiente", icon: <ArrowUpRight size={18} /> }
+        ],
+        img: "https://images.unsplash.com/photo-1769374071909-c2a0595553ae?q=80&w=687&auto=format&fit=crop"
     }
 ];
 
 const Events = () => {
     const [activeId, setActiveId] = useState("01");
+    const navigate = useNavigate();
 
     return (
         <section className="bg-[#2C342C] py-12 md:py-24 px-4 md:px-12 w-full md:min-h-screen flex flex-col justify-center relative overflow-hidden">
@@ -134,7 +164,13 @@ const Events = () => {
                                                         {event.desc}
                                                     </p>
 
-                                                    <button className="group flex items-center gap-3 text-white font-bold uppercase text-[10px] md:text-xs tracking-[0.2em] border-b border-white/30 pb-2 hover:border-white transition-all">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate('/events/plan', { state: { event } });
+                                                        }}
+                                                        className="group flex items-center gap-3 text-white font-bold uppercase text-[10px] md:text-xs tracking-[0.2em] border-b border-white/30 pb-2 hover:border-white transition-all"
+                                                    >
                                                         Ver Detalles
                                                         <ArrowUpRight size={16} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
                                                     </button>
