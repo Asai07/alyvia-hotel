@@ -14,6 +14,7 @@ import Reviews from '../components/Reviews';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import PromoModal from '../components/PromoModal';
+import Membership from '../components/Membership';
 
 const LandingPage = () => {
     return (
@@ -30,6 +31,7 @@ const LandingPage = () => {
             <Promotions />
             <Events />
             <Reviews />
+            <Membership />
             <Contact />
             <Footer />
         </main>
