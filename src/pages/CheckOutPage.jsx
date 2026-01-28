@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Lock, CheckCircle, Calendar, Users, ShieldCheck, Tag, Gift, Wifi, Coffee, Sparkles } from 'lucide-react';
 import Navbar from '../components/Navbar';
@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// Base de datos simulada de códigos (basada en tu archivo Promotions.jsx y Modal)
+// BASE DE DATOS DE CÓDIGOS
 const PROMO_CODES = {
     'WELCOME2026': { type: 'percent', value: 0.15, minNights: 1, label: '15% Descuento Bienvenida' },
     'WINTER26': { type: 'free_night', value: 1, minNights: 4, label: '4ta Noche Gratis (Invierno)' },
@@ -23,20 +23,59 @@ const CheckoutPage = () => {
     const nights = parseInt(searchParams.get('nights') || "1");
     const checkInRaw = searchParams.get('checkIn');
     const checkOutRaw = searchParams.get('checkOut');
-    const adults = searchParams.get('adults') || "2";
+    const promoFromUrl = searchParams.get('promo'); // Código que viene del BookingPage
 
     // Formateo de fechas
     const displayCheckIn = checkInRaw ? format(new Date(checkInRaw), 'dd MMM yyyy', { locale: es }) : "N/A";
     const displayCheckOut = checkOutRaw ? format(new Date(checkOutRaw), 'dd MMM yyyy', { locale: es }) : "N/A";
 
-    // ESTADOS PARA LÓGICA DE NEGOCIO
+    // ESTADOS
     const [promoInput, setPromoInput] = useState('');
     const [appliedPromo, setAppliedPromo] = useState(null);
     const [promoError, setPromoError] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    // LÓGICA DE CÁLCULO
+    // 2. FUNCIÓN DE VALIDACIÓN Y APLICACIÓN
+    const validateAndApplyCode = (codeToTest) => {
+        setPromoError('');
+
+        if (!codeToTest) return;
+
+        const code = codeToTest.trim().toUpperCase();
+        const promo = PROMO_CODES[code];
+
+        // Llenamos el input para que el usuario vea el código
+        setPromoInput(code);
+
+        if (!promo) {
+            setPromoError('El código no es válido.');
+            setAppliedPromo(null);
+            return;
+        }
+
+        // Validaciones condicionales
+        if (nights < promo.minNights) {
+            setPromoError(`La oferta ${code} requiere mínimo ${promo.minNights} noches de estancia.`);
+            setAppliedPromo(null);
+            return;
+        }
+
+        // Si pasa todo, lo aplicamos
+        setAppliedPromo({ ...promo, code });
+        setPromoError('');
+    };
+
+    // 3. EFECTO: INTENTAR APLICAR CÓDIGO AL CARGAR
+    useEffect(() => {
+        if (promoFromUrl) {
+            validateAndApplyCode(promoFromUrl);
+        }
+        // Scroll arriba
+        window.scrollTo(0, 0);
+    }, []);
+
+    // 4. LÓGICA DE CÁLCULO FINANCIERO
     const calculateTotals = () => {
         const baseSubtotal = pricePerNight * nights;
         let discountAmount = 0;
@@ -45,17 +84,14 @@ const CheckoutPage = () => {
             if (appliedPromo.type === 'percent') {
                 discountAmount = baseSubtotal * appliedPromo.value;
             } else if (appliedPromo.type === 'free_night') {
-                // Descuenta el valor de una noche
                 discountAmount = pricePerNight * appliedPromo.value;
             } else if (appliedPromo.type === 'fixed') {
-                // Descuento fijo (ej. $100 usd, asumimos conversión 1:1 para el ejemplo o lo tratamos como crédito)
-                // Para este ejemplo lo restaremos del total, aunque a veces es "crédito en resort"
                 discountAmount = appliedPromo.value;
             }
         }
 
-        const finalSubtotal = Math.max(0, baseSubtotal - discountAmount); // Evitar negativos
-        const taxes = finalSubtotal * 0.16; // IVA sobre el monto con descuento
+        const finalSubtotal = Math.max(0, baseSubtotal - discountAmount);
+        const taxes = finalSubtotal * 0.16;
         const serviceFee = finalSubtotal * 0.05;
         const total = finalSubtotal + taxes + serviceFee;
 
@@ -64,30 +100,9 @@ const CheckoutPage = () => {
 
     const { baseSubtotal, discountAmount, taxes, serviceFee, total } = calculateTotals();
 
-    // MANEJO DE CUPONES
-    const handleApplyPromo = () => {
-        setPromoError('');
-        const code = promoInput.trim().toUpperCase();
-
-        if (!code) return;
-
-        const promo = PROMO_CODES[code];
-
-        if (!promo) {
-            setPromoError('El código no es válido.');
-            setAppliedPromo(null);
-            return;
-        }
-
-        // Validaciones condicionales (ej. noches mínimas)
-        if (nights < promo.minNights) {
-            setPromoError(`Este código requiere mínimo ${promo.minNights} noches.`);
-            setAppliedPromo(null);
-            return;
-        }
-
-        setAppliedPromo({ ...promo, code });
-        setPromoError(''); // Limpiar errores
+    // MANEJO MANUAL (Botón "Aplicar")
+    const handleApplyManual = () => {
+        validateAndApplyCode(promoInput);
     };
 
     const handlePayment = (e) => {
@@ -131,15 +146,13 @@ const CheckoutPage = () => {
                     <span className="text-xs font-bold uppercase tracking-widest">Volver a Selección</span>
                 </button>
 
-                {/* AQUÍ ESTÁ EL TRUCO DEL ORDEN EN MÓVIL: flex-col-reverse */}
                 <div className="flex flex-col-reverse lg:flex-row gap-12">
 
-                    {/* COLUMNA IZQUIERDA: FORMULARIO (Se va abajo en móvil) */}
+                    {/* COLUMNA IZQUIERDA: FORMULARIO */}
                     <div className="w-full lg:w-2/3">
                         <h1 className="font-serif text-3xl md:text-4xl text-[#2C342C] mb-8">Finalizar Reserva</h1>
 
                         <form onSubmit={handlePayment} className="space-y-8">
-                            {/* ... (Sección 1: Datos Personales - IGUAL QUE ANTES) ... */}
                             <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#2C342C]/5">
                                 <h3 className="font-serif text-xl text-[#2C342C] mb-6">1. Información del Huésped</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -149,7 +162,6 @@ const CheckoutPage = () => {
                                 </div>
                             </div>
 
-                            {/* ... (Sección 2: Pago - IGUAL QUE ANTES) ... */}
                             <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#2C342C]/5">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="font-serif text-xl text-[#2C342C]">2. Método de Pago</h3>
@@ -174,23 +186,19 @@ const CheckoutPage = () => {
                         </form>
                     </div>
 
-                    {/* COLUMNA DERECHA: RESUMEN (Se va arriba en móvil) */}
+                    {/* COLUMNA DERECHA: RESUMEN */}
                     <div className="w-full lg:w-1/3">
-                        <div className="sticky top-32 space-y-6"> {/* Agregué space-y-6 para separar tarjetas */}
+                        <div className="sticky top-32 space-y-6">
 
-                            {/* TARJETA 1: Resumen Principal */}
                             <div className="bg-white p-8 rounded-[2rem] shadow-xl ring-1 ring-black/5 relative overflow-hidden">
-                                {/* Decoración de fondo */}
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#C5A880] rounded-full blur-[60px] opacity-10 pointer-events-none"></div>
 
                                 <h3 className="font-serif text-xl text-[#2C342C] mb-6 relative z-10">Tu Estancia</h3>
 
-                                {/* Info Habitación */}
                                 <div className="mb-6 pb-6 border-b border-gray-100 relative z-10">
                                     <p className="text-[#C5A880] text-[10px] font-bold uppercase tracking-widest mb-1">Habitación Seleccionada</p>
                                     <p className="font-serif text-2xl text-[#2C342C] leading-none mb-4">{roomName}</p>
 
-                                    {/* NUEVO: Amenidades Incluidas */}
                                     <div className="bg-[#F9F9F7] p-4 rounded-xl">
                                         <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
                                             <Gift size={12} /> Amenidades Incluidas
@@ -204,7 +212,6 @@ const CheckoutPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Info Fechas */}
                                 <div className="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-100 relative z-10">
                                     <div>
                                         <div className="flex items-center gap-2 text-gray-400 mb-1">
@@ -237,7 +244,7 @@ const CheckoutPage = () => {
                                                 />
                                             </div>
                                             <button
-                                                onClick={handleApplyPromo}
+                                                onClick={handleApplyManual}
                                                 className="bg-[#2C342C] text-white px-4 rounded-lg text-xs font-bold uppercase hover:bg-black transition-colors"
                                             >
                                                 Aplicar
@@ -251,10 +258,10 @@ const CheckoutPage = () => {
                                                 </p>
                                                 <p className="text-[10px] text-gray-600">{appliedPromo.label}</p>
                                             </div>
-                                            <button onClick={() => setAppliedPromo(null)} className="text-xs text-gray-400 hover:text-red-500 underline">Quitar</button>
+                                            <button onClick={() => { setAppliedPromo(null); setPromoInput(''); }} className="text-xs text-gray-400 hover:text-red-500 underline">Quitar</button>
                                         </div>
                                     )}
-                                    {promoError && <p className="text-[10px] text-red-500 mt-2 font-medium">{promoError}</p>}
+                                    {promoError && <p className="text-[10px] text-red-500 mt-2 font-medium bg-red-50 p-2 rounded-lg">{promoError}</p>}
                                 </div>
 
                                 {/* DESGLOSE FINANCIERO */}
@@ -264,7 +271,6 @@ const CheckoutPage = () => {
                                         <span>${baseSubtotal.toLocaleString()}</span>
                                     </div>
 
-                                    {/* Mostrar Descuento si existe */}
                                     {appliedPromo && (
                                         <div className="flex justify-between text-[#C5A880] font-medium">
                                             <span>Descuento aplicado</span>
@@ -289,7 +295,6 @@ const CheckoutPage = () => {
                                 </div>
                             </div>
 
-                            {/* Mensaje de Garantía (Opcional, abajo de la tarjeta) */}
                             <div className="text-center">
                                 <p className="text-[10px] text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
                                     <ShieldCheck size={12} /> Mejor precio garantizado

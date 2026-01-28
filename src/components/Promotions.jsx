@@ -88,6 +88,7 @@ const Promotions = () => {
                             whileHover={{ y: -15 }}
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
                             className="relative w-[320px] md:w-[400px] aspect-[3/4] group cursor-pointer"
+                            onClick={() => navigate(`/booking?promo=${offer.code}`)}
                         >
                             <div className="w-full h-full rounded-[2rem] overflow-hidden shadow-xl shadow-forest/5 relative">
                                 <img
@@ -124,7 +125,13 @@ const Promotions = () => {
                                         </div>
                                     </div>
 
-                                    <button className="text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2 group-hover:gap-4 transition-all hover:text-olive-accent text-cream/80">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Evitar doble clic si la card tiene onClick
+                                            navigate(`/booking?promo=${offer.code}`);
+                                        }}
+                                        className="text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2 group-hover:gap-4 transition-all hover:text-olive-accent text-cream/80"
+                                    >
                                         Reservar Oferta <ArrowRight size={14} />
                                     </button>
                                 </div>

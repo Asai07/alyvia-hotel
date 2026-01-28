@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -55,28 +55,40 @@ const ROOMS_DB = [
 const BookingPage = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+
+    // 1. SCROLL AL INICIO AL CARGAR
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-    // RECUPERAR DATOS URL
+
+    // 2. RECUPERAR DATOS URL
     const checkIn = searchParams.get('checkIn') ? new Date(searchParams.get('checkIn')) : new Date();
     const checkOut = searchParams.get('checkOut') ? new Date(searchParams.get('checkOut')) : new Date();
     const adults = parseInt(searchParams.get('adults') || 2);
     const children = parseInt(searchParams.get('children') || 0);
     const selectedRoomType = searchParams.get('roomType') || "Cualquier Suite";
 
+    // 3. RECUPERAR CÓDIGO PROMOCIONAL (Si viene de Promotions.jsx)
+    const promoCode = searchParams.get('promo');
+
     // CÁLCULOS
     const diffTime = Math.abs(checkOut - checkIn);
     const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-    const formattedDates = `${format(checkIn, 'dd MMM', { locale: es })} - ${format(checkOut, 'dd MMM yyyy', { locale: es })}`;
+
+    // Formateo seguro
+    let formattedDates = "Seleccionar fechas";
+    try {
+        formattedDates = `${format(checkIn, 'dd MMM', { locale: es })} - ${format(checkOut, 'dd MMM yyyy', { locale: es })}`;
+    } catch (e) {
+        // Fallback
+    }
+
     const handleBooking = (room) => {
-        // 1. Formateamos las fechas para que sean strings seguros en la URL
-        // Usamos 'yyyy-MM-dd' para que sea fácil de leer por cualquier sistema
         const checkInStr = format(checkIn, 'yyyy-MM-dd');
         const checkOutStr = format(checkOut, 'yyyy-MM-dd');
 
-        // 2. Construimos la URL con parámetros
-        const params = new URLSearchParams({
+        // Construir parámetros base
+        const paramsObj = {
             roomName: room.matchName,
             price: room.price.toString(),
             nights: nights.toString(),
@@ -84,11 +96,17 @@ const BookingPage = () => {
             checkOut: checkOutStr,
             adults: adults.toString(),
             children: children.toString()
-        });
+        };
 
-        // 3. Navegamos
+        // 4. AGREGAR EL CÓDIGO AL CHECKOUT SI EXISTE
+        if (promoCode) {
+            paramsObj.promo = promoCode;
+        }
+
+        const params = new URLSearchParams(paramsObj);
         navigate(`/checkout?${params.toString()}`);
     };
+
     // ORDENAMIENTO
     const sortedRooms = [...ROOMS_DB].sort((a, b) => {
         if (selectedRoomType === "Cualquier Suite") return 0;
@@ -96,16 +114,15 @@ const BookingPage = () => {
     });
 
     return (
-        <div className="bg-[#F9F9F7] min-h-screen font-sans selection:bg-[#2C342C] selection:text-white">
+        <div className="bg-[#F9F9F7] min-h-screen font-sans selection:bg-[#2C342C] selection:text-white pb-20">
 
-            {/* Navbar pegajoso */}
             <div className="bg-white shadow-sm sticky top-0 z-40">
                 <Navbar />
             </div>
 
             <div className="max-w-[1400px] mx-auto px-6 py-12">
 
-                {/* ENCABEZADO (Con separación extra añadida mt-8) */}
+                {/* ENCABEZADO */}
                 <div className="mb-12 mt-8">
                     <div className="flex items-center gap-2 text-[#C5A880] mb-2">
                         <Calendar size={18} />
@@ -118,6 +135,13 @@ const BookingPage = () => {
                             ? "Nuestras Suites Disponibles"
                             : `Disponibilidad para "${selectedRoomType}"`}
                     </h1>
+                    {/* Mensaje si hay promo activa */}
+                    {promoCode && (
+                        <div className="mt-4 inline-flex items-center gap-2 bg-[#C5A880]/10 text-[#C5A880] px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
+                            <span className="w-2 h-2 rounded-full bg-[#C5A880]"></span>
+                            Oferta aplicada: {promoCode}
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-12">
@@ -140,7 +164,6 @@ const BookingPage = () => {
                                         </div>
                                     )}
 
-                                    {/* Imagen */}
                                     <div className="w-full md:w-2/5 relative overflow-hidden h-64 md:h-auto">
                                         <img
                                             src={room.image}
@@ -149,7 +172,6 @@ const BookingPage = () => {
                                         />
                                     </div>
 
-                                    {/* Contenido */}
                                     <div className="w-full md:w-3/5 p-8 flex flex-col justify-between">
                                         <div>
                                             <div className="flex justify-between items-start mb-2">
@@ -175,7 +197,6 @@ const BookingPage = () => {
                                             </div>
                                         </div>
 
-                                        {/* FOOTER TARJETA: Aquí está la acción principal */}
                                         <div className="bg-[#F9F9F7] -mx-8 -mb-8 p-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                                             <div>
                                                 <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
@@ -189,7 +210,7 @@ const BookingPage = () => {
                                             </div>
 
                                             <button
-                                                onClick={() => handleBooking(room)} // <--- AQUÍ EL CAMBIO
+                                                onClick={() => handleBooking(room)}
                                                 className={`px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg
     ${isSelected ? 'bg-[#C5A880] text-white hover:bg-[#b0926b]' : 'bg-[#2C342C] text-white hover:bg-[#1A211B]'}`}
                                             >
@@ -202,12 +223,10 @@ const BookingPage = () => {
                         })}
                     </div>
 
-                    {/* COLUMNA DERECHA: RESUMEN FLOTANTE (Solo Información) */}
+                    {/* COLUMNA DERECHA */}
                     <div className="w-full lg:w-1/3 relative hidden lg:block">
                         <div className="sticky top-32">
                             <div className="bg-[#2C342C] text-[#F2F0E9] p-8 rounded-[2rem] shadow-2xl relative overflow-hidden ring-4 ring-white">
-
-                                {/* Decoración sutil */}
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-[#C5A880] rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
 
                                 <div className="relative z-10">
@@ -215,7 +234,6 @@ const BookingPage = () => {
                                     <p className="text-white/40 text-xs mb-6">Detalles de tu búsqueda actual</p>
 
                                     <div className="space-y-6">
-                                        {/* Fechas */}
                                         <div className="flex gap-4 group cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-colors" onClick={() => navigate('/')}>
                                             <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-[#C5A880]">
                                                 <Calendar size={20} />
@@ -229,7 +247,6 @@ const BookingPage = () => {
                                             </div>
                                         </div>
 
-                                        {/* Huéspedes */}
                                         <div className="flex gap-4 group cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-colors" onClick={() => navigate('/')}>
                                             <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-[#C5A880]">
                                                 <Users size={20} />
@@ -248,7 +265,6 @@ const BookingPage = () => {
                                     </div>
 
                                     <div className="mt-8 pt-6 border-t border-white/10">
-                                        {/* Botón Secundario (Discreto) */}
                                         <button
                                             onClick={() => navigate('/')}
                                             className="w-full py-3 text-xs font-bold uppercase tracking-widest text-[#C5A880] hover:text-white hover:bg-white/10 border border-[#C5A880]/30 rounded-xl transition-all flex items-center justify-center gap-2"
