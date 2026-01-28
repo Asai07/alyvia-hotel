@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+// 1. RECUPERAMOS EL WIDGET
+import BookingWidget from './BookingWidget';
 
-// Definimos tus imágenes locales
 const heroImages = [
     "/hero-images/hotel-hero-1.webp",
     "/hero-images/hotel-hero-2.webp",
@@ -9,10 +10,8 @@ const heroImages = [
 ];
 
 const Hero = () => {
-    // Estado para el carrusel
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    // Efecto de cambio automático (cada 5 segundos)
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
@@ -22,18 +21,17 @@ const Hero = () => {
 
     return (
         <div className="w-full bg-white pb-20 pt-24">
-            {/* TU DISEÑO ORIGINAL: Contenedor con márgenes y bordes redondeados */}
+
+            {/* Contenedor de la Imagen (Tarjeta Flotante) */}
             <div className="relative mx-4 md:mx-6 lg:mx-8 rounded-[2.5rem] overflow-hidden h-[480px] md:h-[600px] shadow-2xl shadow-gray-200">
 
-                {/* LOGICA DEL CARRUSEL (Reemplaza la imagen estática) */}
+                {/* CARRUSEL DE IMÁGENES */}
                 <AnimatePresence mode="popLayout">
                     <motion.img
                         key={currentImageIndex}
                         src={heroImages[currentImageIndex]}
-                        alt="Hero"
+                        alt="Hero Alyvia"
                         className="absolute inset-0 w-full h-full object-cover"
-
-                        // Animación suave de "Crossfade" y Zoom lento
                         initial={{ opacity: 0, scale: 1.1 }}
                         animate={{ opacity: 1, scale: 1.05 }}
                         exit={{ opacity: 0 }}
@@ -44,10 +42,10 @@ const Hero = () => {
                     />
                 </AnimatePresence>
 
-                {/* OVERLAY OSCURO (Tu diseño original) */}
+                {/* Overlay Oscuro */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30 pointer-events-none"></div>
 
-                {/* CONTENIDO DE TEXTO (Tu diseño original) */}
+                {/* Texto Central */}
                 <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4 pt-8">
                     <motion.h1
                         initial={{ y: 30, opacity: 0 }}
@@ -68,6 +66,12 @@ const Hero = () => {
                     </motion.p>
                 </div>
             </div>
+
+            {/* 2. AQUÍ ESTÁ EL WIDGET RESTAURADO */}
+            <div className="relative z-20 -mt-16 md:-mt-24 px-6 max-w-6xl mx-auto">
+                <BookingWidget />
+            </div>
+
         </div>
     );
 };
