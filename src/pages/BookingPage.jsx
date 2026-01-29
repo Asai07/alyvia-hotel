@@ -114,8 +114,7 @@ const BookingPage = () => {
     });
 
     return (
-        <div className="bg-[#F9F9F7] min-h-screen font-sans selection:bg-[#2C342C] selection:text-white pb-20">
-
+        <div className="bg-[#F9F9F7] min-h-screen font-sans selection:bg-[#2C342C] selection:text-white">
             <div className="bg-white shadow-sm sticky top-0 z-40">
                 <Navbar />
             </div>
