@@ -15,6 +15,10 @@ import RestaurantBookingPage from './pages/RestaurantBookingPage';
 import ExperienceBookingPage from './pages/ExperienceBookingPage';
 import AboutPage from './pages/AboutPage';
 import EventPlanningPage from './pages/EventPlanningPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import CancellationPage from './pages/CancellationPage';
+import FaqPage from './pages/FaqPage';
 
 function App() {
   // CONFIGURACIÓN PREMIUM DE LENIS
@@ -44,6 +48,10 @@ function App() {
             <Route path="/dining/book" element={<RestaurantBookingPage />} />
             <Route path="/experiences/book" element={<ExperienceBookingPage />} />
             <Route path="/events/plan" element={<EventPlanningPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/cancellation" element={<CancellationPage />} />
+            <Route path="/faq" element={<FaqPage />} />
           </Routes>
         </Router>
       </ReactLenis>

@@ -38,7 +38,7 @@ const restaurants = [
         chef: "Kenjiro Sato",
         desc: "Una experiencia silenciosa y precisa. Sushi tradicional preparado al momento en nuestra barra exclusiva de ciprés hinoki para solo 8 comensales.",
         open: "Cena: 8pm (Un Turno)",
-        img: "https://images.unsplash.com/photo-1579027989536-b7b1f875659b?q=80&w=2070&auto=format&fit=crop"
+        img: "https://images.unsplash.com/photo-1681270496598-13c5365730c8?q=80&w=1290&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         id: 5,

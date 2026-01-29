@@ -3,7 +3,7 @@ import { ArrowRight, MapPin, Phone, Mail } from 'lucide-react';
 
 const Contact = () => {
     return (
-        <section className="flex flex-col lg:flex-row min-h-screen">
+        <section id="contacto" className="flex flex-col lg:flex-row min-h-screen">
 
             {/* COLUMNA IZQUIERDA */}
             <div className="w-full lg:w-1/2 bg-[#2C342C] text-cream px-8 py-20 md:p-24 flex flex-col justify-center relative overflow-hidden">
