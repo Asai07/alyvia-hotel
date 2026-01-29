@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const img1 = "/imagenes-hotel/vista-pool.webp";
+const img1 = "/imagenes-hotel/about-view.webp";
 const img2 = "/imagenes-hotel/vista-mar.webp";
 
 const About = () => {
